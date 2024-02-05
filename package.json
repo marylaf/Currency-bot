@@ -19,6 +19,7 @@
   "homepage": "https://github.com/marylaf/Currency-bot#readme",
   "description": "",
   "dependencies": {
+    "@telegraf/session": "^2.0.0-beta.7",
     "dotenv": "^16.4.1",
     "mongodb": "^6.3.0",
     "nodemon": "^3.0.3",

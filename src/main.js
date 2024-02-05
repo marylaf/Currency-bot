@@ -1,11 +1,20 @@
-import { Telegraf } from "telegraf";
+import { Telegraf, session } from "telegraf";
 import { config } from "dotenv";
+import { getRandomFlower, shuffleArrayForFlowers } from "./captcha.js";
+import { Mongo } from "@telegraf/session/mongodb";
+
+const store = Mongo({
+	url: "mongodb://127.0.0.1:27017",
+	database: "telegraf-bot",
+});
 
 config();
 
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN, {
   handlerTimeout: Infinity,
 });
+
+bot.use(session({ store, defaultSession: () => ({ count: 0 }) }));
 
 bot.start((ctx) => {
   const flowers = [
@@ -20,32 +29,10 @@ bot.start((ctx) => {
     { text: "💐", callback_data: "bouquet" },
     { text: "🌾", callback_data: "wheat" },
   ];
-
-  function getRandomFlower(array) {
-    const randomIndex = Math.floor(Math.random() * array.length); // getting random element
-    return array[randomIndex];
-  }
-
-  function shuffleArrayForFlowers(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1)); // getting random array
-
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-
-    const chunkSize = 3;
-    let chunkedArray = [];
-    for (let i = 0; i < array.length; i += chunkSize) {
-      chunkedArray.push(array.slice(i, i + chunkSize)); // converting multidimensional array
-    }
-
-    return chunkedArray;
-  }
-
   const captchaFlower = getRandomFlower(flowers); // random flower element
   const captchaArray = shuffleArrayForFlowers(flowers); // random flower array
 
-  console.log(captchaArray);
+  ctx.session.correctAnswer = captchaFlower.callback_data; // saving state in storage
 
   const startTextMessage = `🤖 Для того, чтобы начать получать актуальные курсы, вам необходимо пройти капчу!\n\nВыберите на клавиатуре ${captchaFlower.text}`;
   const startCaptchaMessage = {
@@ -55,6 +42,21 @@ bot.start((ctx) => {
   };
 
   ctx.reply(startTextMessage, startCaptchaMessage);
+});
+
+bot.on('callback_query', async (ctx) => {
+  try {
+      const callbackData = ctx.callbackQuery.data;
+  if (callbackData === ctx.session.correctAnswer) {
+      // Отправка сообщения о правильном выборе
+      await ctx.reply('✅ Вы успешно подписались на бота.\n\n🔔 Теперь вам будут приходить актуальные курсы!');
+  } else {
+     // Отправка сообщения о неправильном выборе
+    await ctx.answerCbQuery(ctx.callbackQuery.id, {text: '❌ Вы не прошли капчу, попробуйте ещё раз',  show_alert: true });
+  }
+  } catch (error) {
+      console.error(`Ошибка: ${error.message}`, error);
+  }
 });
 
 bot.launch();
