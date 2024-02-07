@@ -2,10 +2,11 @@ import { Telegraf, session } from "telegraf";
 import { config } from "dotenv";
 import { getRandomFlower, shuffleArrayForFlowers } from "./captcha.js";
 import { Mongo } from "@telegraf/session/mongodb";
+import {  sendCombinedMessage } from './rates.js';
 
 const store = Mongo({
-	url: "mongodb://127.0.0.1:27017",
-	database: "telegraf-bot",
+  url: "mongodb://127.0.0.1:27017",
+  database: "telegraf-bot",
 });
 
 config();
@@ -44,19 +45,55 @@ bot.start((ctx) => {
   ctx.reply(startTextMessage, startCaptchaMessage);
 });
 
-bot.on('callback_query', async (ctx) => {
+bot.on("callback_query", async (ctx) => {
   try {
-      const callbackData = ctx.callbackQuery.data;
-  if (callbackData === ctx.session.correctAnswer) {
+    const callbackData = ctx.callbackQuery.data;
+    if (callbackData === ctx.session.correctAnswer) {
       // Отправка сообщения о правильном выборе
-      await ctx.reply('✅ Вы успешно подписались на бота.\n\n🔔 Теперь вам будут приходить актуальные курсы!');
-  } else {
-     // Отправка сообщения о неправильном выборе
-    await ctx.answerCbQuery(ctx.callbackQuery.id, {text: '❌ Вы не прошли капчу, попробуйте ещё раз',  show_alert: true });
-  }
+      await ctx.reply(
+        "✅ Вы успешно подписались на бота.\n\n🔔 Теперь вам будут приходить актуальные курсы!"
+      );
+    } else {
+      // Отправка сообщения о неправильном выборе
+      await ctx.answerCbQuery(ctx.callbackQuery.id, {
+        text: "❌ Вы не прошли капчу, попробуйте ещё раз",
+        show_alert: true,
+      });
+    }
   } catch (error) {
-      console.error(`Ошибка: ${error.message}`, error);
+    console.error(`Ошибка: ${error.message}`, error);
   }
+});
+
+// async function getForexRates() {
+//   const url = "https://jq.profinance.ru/html/htmlquotes/qsse";
+
+//   const headers = {
+//     "Accept": "*/*",
+//     "Content-Type": "text/event-stream",
+//     "User-Agent":
+//       "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+//   };
+
+//   const params = {
+//     msg: "1;SID=3d7Nfn2o;T=1707334930130",
+//   };
+
+//   try {
+//     const response = await axios.post(url, params, { headers: headers });
+//     return response;
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
+
+
+bot.hears("hi", (ctx) => {
+  sendCombinedMessage(ctx);
+
+  setInterval(() => {
+    sendCombinedMessage(ctx);
+  }, 60000);
 });
 
 bot.launch();
