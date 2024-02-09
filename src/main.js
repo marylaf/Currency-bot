@@ -65,29 +65,6 @@ bot.on("callback_query", async (ctx) => {
   }
 });
 
-// async function getForexRates() {
-//   const url = "https://jq.profinance.ru/html/htmlquotes/qsse";
-
-//   const headers = {
-//     "Accept": "*/*",
-//     "Content-Type": "text/event-stream",
-//     "User-Agent":
-//       "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
-//   };
-
-//   const params = {
-//     msg: "1;SID=3d7Nfn2o;T=1707334930130",
-//   };
-
-//   try {
-//     const response = await axios.post(url, params, { headers: headers });
-//     return response;
-//   } catch (error) {
-//     console.error(error);
-//   }
-// }
-
-
 bot.hears("hi", (ctx) => {
   sendCombinedMessage(ctx);
 
