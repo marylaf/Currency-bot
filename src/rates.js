@@ -1,6 +1,7 @@
 import axios from "axios";
 import puppeteer from "puppeteer";
 
+// Function for receiving Forex rates
 async function getForexRate() {
   let message = "";
   try {
@@ -64,6 +65,7 @@ async function getForexRate() {
   return message;
 }
 
+// Function for receiving currency rates
 async function getLigRate() {
   let message = "";
   try {
@@ -123,7 +125,7 @@ async function getLigRate() {
   return message;
 }
 
-// Функция для получения курсов криптовалют
+// Function for receiving cryptocurrency rates
 export async function getCryptoRate() {
   let messages = [];
   try {
@@ -145,7 +147,7 @@ export async function getCryptoRate() {
   return messages.join("\n");
 }
 
-// Функция для получения курсов криптовалют
+// Function for receiving usdt rates
 export async function getUsdtRate() {
   let messages = [];
   try {
