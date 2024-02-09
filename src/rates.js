@@ -106,13 +106,15 @@ async function getLigRate() {
         rate.title === "USD" ||
         rate.title === "EUR" ||
         rate.title === "EUR/USD"  ||
-        rate.title === "CNY"
+        rate.title === "CNY" ||
+        rate.title === "GBP"  ||
+        rate.title === "CHF"
     );
 
     message = filteredRates
       .map(
         (rate) =>
-          `${rate.title}(Покупка): ${rate.buyPrice}\n${rate.title}(Продажа): ${rate.sellPrice}`
+          `${rate.title}: ${rate.buyPrice}/${rate.sellPrice}`
       )
       .join("\n");
   } catch (error) {
@@ -143,14 +145,57 @@ export async function getCryptoRate() {
   return messages.join("\n");
 }
 
-// Теперь напишем функцию sendCombinedMessage
+// Функция для получения курсов криптовалют
+export async function getUsdtRate() {
+  let messages = [];
+  try {
+    const markets = ["usdtrub", "usdtusd", "usdteur"];
+    const responses = await Promise.all(
+      markets.map((market) =>
+        axios.get(`https://garantex.org/api/v2/depth?market=${market}`)
+      )
+    );
+
+    messages = responses.map((res, index) => {
+      const market = markets[index];
+      const dataBid = res.data["bids"][0];
+      const dataAsk = res.data["asks"][0];
+      const formattedBidFactor = (parseFloat(dataBid.factor) * 100).toFixed(1) + '%';
+      const formattedAskFactor = (parseFloat(dataAsk.factor) * 100).toFixed(1) + '%';
+      if (market === "usdtrub") {
+        return `GBid ${dataBid.price}|${formattedBidFactor}\nGAsk ${dataAsk.price}|${formattedAskFactor}`;
+      }
+      if (market === "usdtusd") {
+      return `GBid ${dataBid.price}$\nGAsk ${dataAsk.price}$`;
+      }
+      return `GBid ${dataBid.price}€\nGAsk ${dataAsk.price}€`;
+    });
+  } catch (error) {
+    console.error(`Ошибка при получении курсов USDT: ${error.message}`);
+  }
+  return messages.join("\n");
+}
+
+// function for getting time
+export async function getTime() {
+  try {
+    const timestamp = await axios.get('https://garantex.org/api/v2/timestamp');
+    return `Текущее время: ${timestamp.data} UTC`;
+  } catch (error) {
+    console.error(`Ошибка при получении времени: ${error.message}`);
+  }
+}
+
+// function connecting messages
 export async function sendCombinedMessage(ctx) {
+  const usdtRates = await getUsdtRate();
   const cryptoRates = await getCryptoRate();
   const forexRates = await getForexRate();
   const ligRates = await getLigRate();
-  // Соединяем отформатированные сообщения
-  const combinedMessage = `\`\`\`\n${cryptoRates}\n\n${ligRates}\n\n${forexRates}\`\`\``;
+  const time = await getTime();
 
-  // Отправляем соединенное сообщение
+  const combinedMessage = `\`\`\`\n${usdtRates}\n\n${cryptoRates}\n\n${ligRates}\n\n${forexRates}\`\`\`
+  *${time}*`;
+
   ctx.reply(combinedMessage, { parse_mode: "Markdown" });
 }
