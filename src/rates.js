@@ -1,6 +1,8 @@
 import axios from "axios";
 import puppeteer from "puppeteer";
 
+import { sendMessageToAllUsers } from './main.js';
+
 // Function for receiving Forex rates
 async function getForexRate() {
   let message = "";
@@ -188,16 +190,23 @@ export async function getTime() {
   }
 }
 
-// function connecting messages
-export async function sendCombinedMessage(ctx) {
+let lastCombinedMessage = null;
+
+async function doCrawling() {
+  console.log("DO CRAWLING");
   const usdtRates = await getUsdtRate();
   const cryptoRates = await getCryptoRate();
   const forexRates = await getForexRate();
   const ligRates = await getLigRate();
   const time = await getTime();
 
-  const combinedMessage = `\`\`\`\n${usdtRates}\n\n${cryptoRates}\n\n${ligRates}\n\n${forexRates}\`\`\`
+  lastCombinedMessage = `\`\`\`\n${usdtRates}\n\n${cryptoRates}\n\n${ligRates}\n\n${forexRates}\`\`\`
   *${time}*`;
 
-  ctx.reply(combinedMessage, { parse_mode: "Markdown" });
+  sendMessageToAllUsers(lastCombinedMessage);
 }
+
+doCrawling();
+setInterval(() => {
+  doCrawling();
+}, 20000);
