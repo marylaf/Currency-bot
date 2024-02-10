@@ -8,6 +8,7 @@ import {
   getAllSubscriptions,
 } from "./model.js";
 import "./rates.js";
+import { flowers } from "./constants.js";
 
 const store = Mongo({
   url: "mongodb://127.0.0.1:27017",
@@ -45,24 +46,12 @@ export async function sendMessageToAllUsers(message) {
 }
 
 bot.start((ctx) => {
-  const userId = ctx.update.message.from.id;
-  
-  if (userId === ctx.session.userId) {
+  if (ctx.session.isSaved == true) {
     addSubscription(ctx.update.message.chat.id);
-    ctx.reply("👋 Добро пожаловать обратно! Вы уже прошли капчу. Подписка на курсы снова активна.");
+    ctx.reply(
+      "👋 Добро пожаловать обратно! Вы уже прошли капчу. Подписка на курсы снова активна."
+    );
   } else {
-    const flowers = [
-      { text: "🌼", callback_data: "daisy" },
-      { text: "🌺", callback_data: "hibiscus" },
-      { text: "🥀", callback_data: "wilted_flower" },
-      { text: "🍀", callback_data: "clover" },
-      { text: "🌸", callback_data: "peony" },
-      { text: "🌷", callback_data: "tulip" },
-      { text: "🌹", callback_data: "rose" },
-      { text: "🪷", callback_data: "lotos" },
-      { text: "💐", callback_data: "bouquet" },
-      { text: "🌾", callback_data: "wheat" },
-    ];
     const captchaFlower = getRandomFlower(flowers); // random flower element
     const captchaArray = shuffleArrayForFlowers(flowers); // random flower array
 
@@ -82,11 +71,10 @@ bot.start((ctx) => {
 bot.on("callback_query", async (ctx) => {
   try {
     const callbackData = ctx.callbackQuery.data;
-    const userId = ctx.callbackQuery.from.id;
     const userName = ctx.callbackQuery.from.username;
-   
+
     if (callbackData === ctx.session.correctAnswer) {
-      ctx.session.userId = userId;
+      ctx.session.isSaved = true;
       ctx.session.username = userName;
 
       addSubscription(ctx.callbackQuery.message.chat.id);
@@ -95,6 +83,19 @@ bot.on("callback_query", async (ctx) => {
         "✅ Вы успешно подписались на бота.\n\n🔔 Теперь вам будут приходить актуальные курсы!"
       );
     } else {
+      const newCaptchaFlower = getRandomFlower(flowers);
+      const newCaptchaArray = shuffleArrayForFlowers(flowers);
+
+      ctx.session.correctAnswer = newCaptchaFlower.callback_data;
+
+      await ctx.editMessageText(
+        `🤖 Для того, чтобы начать получать актуальные курсы, вам необходимо пройти капчу!\n\nВыберите на клавиатуре ${newCaptchaFlower.text}`
+      );
+
+      await ctx.editMessageReplyMarkup({
+        inline_keyboard: newCaptchaArray,
+      });
+
       await ctx.answerCbQuery(ctx.callbackQuery.id, {
         text: "❌ Вы не прошли капчу, попробуйте ещё раз",
         show_alert: true,
