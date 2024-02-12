@@ -1,21 +1,24 @@
 import { Telegraf, session } from "telegraf";
+import { Postgres } from "@telegraf/session/pg";
 import { config } from "dotenv";
 import { getRandomFlower, shuffleArrayForFlowers } from "./captcha.js";
-import { Mongo } from "@telegraf/session/mongodb";
 import {
   addSubscription,
   removeSubscription,
   getAllSubscriptions,
-} from "./model.js";
+} from "./db.js";
 import "./rates.js";
 import { flowers } from "./constants.js";
 
-const store = Mongo({
-  url: "mongodb://127.0.0.1:27017",
-  database: "telegraf-bot",
-});
-
 config();
+
+const store = Postgres({
+  user: process.env.POSTGRESQL_USER,
+  host: process.env.POSTGRESQL_HOST,
+  database: process.env.POSTGRESQL_DBNAME,
+  password: process.env.POSTGRESQL_PASSWORD,
+  port: process.env.POSTGRESQL_PORT,
+});
 
 const bot = new Telegraf(process.env.TELEGRAM_TOKEN, {
   handlerTimeout: Infinity,
@@ -54,9 +57,9 @@ bot.start((ctx) => {
   } else {
     const captchaFlower = getRandomFlower(flowers); // random flower element
     const captchaArray = shuffleArrayForFlowers(flowers); // random flower array
-
+    console.log('САМ ЦВЕТОК СГЕНЕРИРОВАННЫЙ', captchaFlower);
     ctx.session.correctAnswer = captchaFlower.callback_data; // saving state in storage
-
+    ctx.session.username = userName; // saving username in storage
     const startTextMessage = `🤖 Для того, чтобы начать получать актуальные курсы, вам необходимо пройти капчу!\n\nВыберите на клавиатуре ${captchaFlower.text}`;
     const startCaptchaMessage = {
       reply_markup: {
@@ -74,6 +77,7 @@ bot.on("callback_query", async (ctx) => {
     const userName = ctx.callbackQuery.from.username;
 
     if (callbackData === ctx.session.correctAnswer) {
+      console.log("Получилось!");
       ctx.session.isSaved = true;
       ctx.session.username = userName;
 
