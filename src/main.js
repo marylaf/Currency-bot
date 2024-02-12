@@ -57,7 +57,6 @@ bot.start((ctx) => {
   } else {
     const captchaFlower = getRandomFlower(flowers); // random flower element
     const captchaArray = shuffleArrayForFlowers(flowers); // random flower array
-    console.log('САМ ЦВЕТОК СГЕНЕРИРОВАННЫЙ', captchaFlower);
     ctx.session.correctAnswer = captchaFlower.callback_data; // saving state in storage
     ctx.session.username = userName; // saving username in storage
     const startTextMessage = `🤖 Для того, чтобы начать получать актуальные курсы, вам необходимо пройти капчу!\n\nВыберите на клавиатуре ${captchaFlower.text}`;
@@ -109,5 +108,14 @@ bot.on("callback_query", async (ctx) => {
     console.error(`Ошибка: ${error.message}`, error);
   }
 });
+
+// bot.launch({
+//   webhook: {
+//     domain: webhookDomain,
+//     port: port,
+//     path: webhookPath,
+//     secretToken: randomAlphaNumericString,
+//   },
+// }); 
 
 bot.launch();

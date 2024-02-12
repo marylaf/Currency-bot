@@ -8,7 +8,9 @@ async function getForexRate() {
   let message = "";
   try {
     const url = "https://www.profinance.ru/";
-    const browser = await puppeteer.launch();
+    const browser = await puppetteer.launch({
+      args: ['--no-sandbox']
+   })
     const page = await browser.newPage();
 
     await page.goto(url, {
@@ -72,7 +74,9 @@ async function getLigRate() {
   let message = "";
   try {
     const url = "https://ligovka.ru/pda/";
-    const browser = await puppeteer.launch();
+    const browser = await puppetteer.launch({
+      args: ['--no-sandbox']
+   })
     const page = await browser.newPage();
 
     await page.goto(url, {
