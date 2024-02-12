@@ -8,7 +8,7 @@ async function getForexRate() {
   let message = "";
   try {
     const url = "https://www.profinance.ru/";
-    const browser = await puppetteer.launch({
+    const browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
    });
@@ -75,7 +75,7 @@ async function getLigRate() {
   let message = "";
   try {
     const url = "https://ligovka.ru/pda/";
-    const browser = await puppetteer.launch({
+    const browser = await puppeteer.launch({
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
    });
