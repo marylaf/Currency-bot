@@ -9,7 +9,7 @@ async function getForexRate() {
   try {
     const url = "https://www.profinance.ru/";
     const browser = await puppeteer.launch({
-      // headless: true,
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
    });
     const page = await browser.newPage();
