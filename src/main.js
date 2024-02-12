@@ -58,7 +58,6 @@ bot.start((ctx) => {
     const captchaFlower = getRandomFlower(flowers); // random flower element
     const captchaArray = shuffleArrayForFlowers(flowers); // random flower array
     ctx.session.correctAnswer = captchaFlower.callback_data; // saving state in storage
-    ctx.session.username = userName; // saving username in storage
     const startTextMessage = `🤖 Для того, чтобы начать получать актуальные курсы, вам необходимо пройти капчу!\n\nВыберите на клавиатуре ${captchaFlower.text}`;
     const startCaptchaMessage = {
       reply_markup: {
