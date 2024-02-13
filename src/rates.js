@@ -216,4 +216,4 @@ async function doCrawling() {
 doCrawling();
 setInterval(() => {
   doCrawling();
-}, 20000);
+}, 30000);
