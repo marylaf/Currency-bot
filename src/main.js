@@ -113,7 +113,6 @@ bot.on("callback_query", async (ctx) => {
 //     domain: webhookDomain,
 //     port: port,
 //     path: webhookPath,
-//     secretToken: randomAlphaNumericString,
 //   },
 // }); 
 

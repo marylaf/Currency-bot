@@ -1,17 +1,18 @@
 import axios from "axios";
 import puppeteer from "puppeteer";
 
-import { sendMessageToAllUsers } from './main.js';
+import { sendMessageToAllUsers } from "./main.js";
 
 // Function for receiving Forex rates
 async function getForexRate() {
   let message = "";
+  let browser;
   try {
     const url = "https://www.profinance.ru/";
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-   });
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
     const page = await browser.newPage();
 
     await page.goto(url, {
@@ -25,7 +26,7 @@ async function getForexRate() {
           "0.00"
         );
       },
-      { timeout: 30000 }
+      { timeout: 25000 }
     );
 
     const rates = await page.evaluate(() => {
@@ -47,11 +48,8 @@ async function getForexRate() {
       return rates;
     });
 
-    await browser.close();
-
     const numberRegex = /^[+-]?(\d+(\.\d+)?|\.\d+)(%)?$/;
-
-    //select only what need
+    
     const filteredRates = rates.filter(
       (rate) =>
         numberRegex.test(rate.price) &&
@@ -66,6 +64,10 @@ async function getForexRate() {
       .join("\n");
   } catch (error) {
     console.error(`Ошибка при получении курсов Forex: ${error.message}`);
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
   return message;
 }
@@ -73,12 +75,13 @@ async function getForexRate() {
 // Function for receiving currency rates
 async function getLigRate() {
   let message = "";
+  let browser;
   try {
     const url = "https://ligovka.ru/pda/";
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-   });
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
 
     const page = await browser.newPage();
 
@@ -110,26 +113,25 @@ async function getLigRate() {
       return rates;
     });
 
-    await browser.close();
-
     const filteredRates = rates.filter(
       (rate) =>
         rate.title === "USD" ||
         rate.title === "EUR" ||
-        rate.title === "EUR/USD"  ||
+        rate.title === "EUR/USD" ||
         rate.title === "CNY" ||
-        rate.title === "GBP"  ||
+        rate.title === "GBP" ||
         rate.title === "CHF"
     );
 
     message = filteredRates
-      .map(
-        (rate) =>
-          `${rate.title}: ${rate.buyPrice}/${rate.sellPrice}`
-      )
+      .map((rate) => `${rate.title}: ${rate.buyPrice}/${rate.sellPrice}`)
       .join("\n");
   } catch (error) {
     console.error(`Ошибка при получении курсов валют: ${error.message}`);
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
   }
   return message;
 }
@@ -171,13 +173,15 @@ export async function getUsdtRate() {
       const market = markets[index];
       const dataBid = res.data["bids"][0];
       const dataAsk = res.data["asks"][0];
-      const formattedBidFactor = (parseFloat(dataBid.factor) * 100).toFixed(1) + '%';
-      const formattedAskFactor = (parseFloat(dataAsk.factor) * 100).toFixed(1) + '%';
+      const formattedBidFactor =
+        (parseFloat(dataBid.factor) * 100).toFixed(1) + "%";
+      const formattedAskFactor =
+        (parseFloat(dataAsk.factor) * 100).toFixed(1) + "%";
       if (market === "usdtrub") {
         return `GBid ${dataBid.price}|${formattedBidFactor}\nGAsk ${dataAsk.price}|${formattedAskFactor}`;
       }
       if (market === "usdtusd") {
-      return `GBid ${dataBid.price}$\nGAsk ${dataAsk.price}$`;
+        return `GBid ${dataBid.price}$\nGAsk ${dataAsk.price}$`;
       }
       return `GBid ${dataBid.price}€\nGAsk ${dataAsk.price}€`;
     });
@@ -190,7 +194,7 @@ export async function getUsdtRate() {
 // function for getting time
 export async function getTime() {
   try {
-    const timestamp = await axios.get('https://garantex.org/api/v2/timestamp');
+    const timestamp = await axios.get("https://garantex.org/api/v2/timestamp");
     return `Текущее время: ${timestamp.data} UTC`;
   } catch (error) {
     console.error(`Ошибка при получении времени: ${error.message}`);
@@ -216,4 +220,6 @@ async function doCrawling() {
 doCrawling();
 setInterval(() => {
   doCrawling();
+  global.gc();
+  console.log("Memory usage:", process.memoryUsage());
 }, 30000);
