@@ -49,7 +49,7 @@ async function getForexRate() {
     });
 
     const numberRegex = /^[+-]?(\d+(\.\d+)?|\.\d+)(%)?$/;
-    
+
     const filteredRates = rates.filter(
       (rate) =>
         numberRegex.test(rate.price) &&
@@ -220,6 +220,4 @@ async function doCrawling() {
 doCrawling();
 setInterval(() => {
   doCrawling();
-  global.gc();
-  console.log("Memory usage:", process.memoryUsage());
 }, 30000);
