@@ -75,7 +75,6 @@ bot.on("callback_query", async (ctx) => {
     const userName = ctx.callbackQuery.from.username;
 
     if (callbackData === ctx.session.correctAnswer) {
-      console.log("Получилось!");
       ctx.session.isSaved = true;
       ctx.session.username = userName;
 
