@@ -29,7 +29,6 @@ export async function addSubscription(chatId) {
         'INSERT INTO subscriptions("chatId") VALUES($1) RETURNING *',
         [chatId]
       );
-      console.log('ПОЛУЧИЛОСЬ');
       return insertRes.rows[0];
     }
   } catch (error) {
