@@ -1,6 +1,5 @@
 import axios from "axios";
 import puppeteer from "puppeteer";
-
 import { sendMessageToAllUsers } from "./main.js";
 
 // Function for receiving Forex rates
@@ -178,12 +177,12 @@ export async function getUsdtRate() {
       const formattedAskFactor =
         (parseFloat(dataAsk.factor) * 100).toFixed(1) + "%";
       if (market === "usdtrub") {
-        return `GBid ${dataBid.price}|${formattedBidFactor}\nGAsk ${dataAsk.price}|${formattedAskFactor}`;
+        return `GAsk ${dataAsk.price}|${formattedAskFactor}\nGBid ${dataBid.price}|${formattedBidFactor}`;
       }
       if (market === "usdtusd") {
-        return `GBid ${dataBid.price}$\nGAsk ${dataAsk.price}$`;
+        return `GAsk ${dataAsk.price}$\nGBid ${dataBid.price}$`;
       }
-      return `GBid ${dataBid.price}€\nGAsk ${dataAsk.price}€`;
+      return `GAsk ${dataAsk.price}€\nGBid ${dataBid.price}€`;
     });
   } catch (error) {
     console.error(`Ошибка при получении курсов USDT: ${error.message}`);
