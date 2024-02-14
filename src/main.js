@@ -49,6 +49,7 @@ export async function sendMessageToAllUsers(message) {
 }
 
 bot.start((ctx) => {
+  console.log('я тут');
   if (ctx.session.isSaved == true) {
     addSubscription(ctx.update.message.chat.id);
     ctx.reply(
@@ -109,8 +110,8 @@ bot.on("callback_query", async (ctx) => {
 
 bot.launch({
   webhook: {
-    domain: WEBHOOK_DOMAIN,
-    port: WEBHOOK_PORT,
-    path: WEBHOOK_PATH,
+    domain: process.env.WEBHOOK_DOMAIN,
+    port: process.env.WEBHOOK_PORT,
+    path: process.env.WEBHOOK_PATH,
   },
 });
