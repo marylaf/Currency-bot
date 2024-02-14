@@ -108,12 +108,10 @@ bot.on("callback_query", async (ctx) => {
   }
 });
 
-// bot.launch({
-//   webhook: {
-//     domain: webhookDomain,
-//     port: port,
-//     path: webhookPath,
-//   },
-// });
-
-bot.launch();
+bot.launch({
+  webhook: {
+    domain: WEBHOOK_DOMAIN,
+    port: WEBHOOK_PORT,
+    path: WEBHOOK_PATH,
+  },
+});
