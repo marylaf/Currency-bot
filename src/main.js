@@ -108,10 +108,4 @@ bot.on("callback_query", async (ctx) => {
   }
 });
 
-bot.launch({
-  webhook: {
-    domain: process.env.WEBHOOK_DOMAIN,
-    port: process.env.WEBHOOK_PORT,
-    path: process.env.WEBHOOK_PATH,
-  },
-});
+bot.launch()
