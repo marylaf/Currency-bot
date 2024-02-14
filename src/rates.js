@@ -79,7 +79,11 @@ async function getLigRate() {
     const url = "https://ligovka.ru/pda/";
     browser = await puppeteer.launch({
       headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+      args: [
+        "--no-sandbox", 
+        "--disable-setuid-sandbox",
+        "--ignore-certificate-errors"
+      ],
     });
 
     const page = await browser.newPage();
