@@ -80,9 +80,9 @@ async function getLigRate() {
     browser = await puppeteer.launch({
       headless: true,
       args: [
-        "--no-sandbox", 
+        "--no-sandbox",
         "--disable-setuid-sandbox",
-        "--ignore-certificate-errors"
+        "--ignore-certificate-errors",
       ],
     });
 
@@ -131,6 +131,44 @@ async function getLigRate() {
       .join("\n");
   } catch (error) {
     console.error(`Ошибка при получении курсов валют: ${error.message}`);
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+  }
+  return message;
+}
+
+async function getXeRate() {
+  let message = "";
+  let browser;
+  try {
+    const url = "https://www.xe.com/currencycharts/";
+    browser = await puppeteer.launch({
+      headless: true,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    });
+
+    const page = await browser.newPage();
+
+    await page.goto(url, {
+      waitUntil: "domcontentloaded",
+    });
+
+    await page.waitForSelector('.table__TableCell-sc-1j0jd5l-1.Zbklu');
+
+    const rate = await page.evaluate(() => {
+      const priceElements = document.querySelectorAll(".table__TableCell-sc-1j0jd5l-1.Zbklu");
+      const price = priceElements[4].textContent.trim();
+
+      return {
+        price,
+      };
+    });
+
+    message = `EUR/USD(XE) - ${rate.price}`;
+  } catch (error) {
+    console.error(`Ошибка при получении курса с XE: ${error.message}`);
   } finally {
     if (browser) {
       await browser.close();
@@ -212,9 +250,10 @@ async function doCrawling() {
   const cryptoRates = await getCryptoRate();
   const forexRates = await getForexRate();
   const ligRates = await getLigRate();
+  const exRate = await getXeRate();
   const time = await getTime();
 
-  lastCombinedMessage = `\`\`\`\n${usdtRates}\n\n${cryptoRates}\n\n${ligRates}\n\n${forexRates}\`\`\`
+  lastCombinedMessage = `\`\`\`\n${usdtRates}\n\n${exRate}\n\n${cryptoRates}\n\n${ligRates}\n\n${forexRates}\`\`\`
   *${time}*`;
 
   sendMessageToAllUsers(lastCombinedMessage);
