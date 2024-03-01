@@ -92,6 +92,8 @@ async function getLigRate() {
       waitUntil: "domcontentloaded",
     });
 
+    await page.waitForSelector('.currency_contaner');
+
     const rates = await page.evaluate(() => {
       const containers = document.querySelectorAll(".currency_contaner");
       const rates = Array.from(containers).map((container) => {
