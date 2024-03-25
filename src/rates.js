@@ -18,15 +18,7 @@ async function getForexRate() {
       waitUntil: "domcontentloaded",
     });
 
-    await page.waitForFunction(
-      () => {
-        return (
-          document.querySelector(".curs td:nth-child(2)").textContent.trim() !==
-          "0.00"
-        );
-      },
-      { timeout: 25000 }
-    );
+    await page.waitForSelector(".curs td:nth-child(2)");
 
     const rates = await page.evaluate(() => {
       const rates = [];
@@ -92,7 +84,7 @@ async function getLigRate() {
       waitUntil: "domcontentloaded",
     });
 
-    await page.waitForSelector('.currency_contaner');
+    await page.waitForSelector(".currency_contaner");
 
     const rates = await page.evaluate(() => {
       const containers = document.querySelectorAll(".currency_contaner");
@@ -157,10 +149,12 @@ async function getXeRate() {
       waitUntil: "domcontentloaded",
     });
 
-    await page.waitForSelector('.table__TableCell-sc-1j0jd5l-1.Zbklu');
+    await page.waitForSelector(".table__TableCell-sc-1j0jd5l-1.Zbklu");
 
     const rate = await page.evaluate(() => {
-      const priceElements = document.querySelectorAll(".table__TableCell-sc-1j0jd5l-1.Zbklu");
+      const priceElements = document.querySelectorAll(
+        ".table__TableCell-sc-1j0jd5l-1.Zbklu"
+      );
       const price = priceElements[4].textContent.trim();
 
       return {
