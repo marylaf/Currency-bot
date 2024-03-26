@@ -7,7 +7,7 @@ async function getForexRate() {
   let message = "";
   let browser;
   try {
-    const url = "https://www.profinance.ru/";
+    const url = "https://alfaforex.ru/analytics/analytics-currencies/";
     browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"],
@@ -18,15 +18,17 @@ async function getForexRate() {
       waitUntil: "domcontentloaded",
     });
 
-    await page.waitForSelector(".curs td:nth-child(2)");
+    await page.waitForSelector(".trading-table__row");
 
     const rates = await page.evaluate(() => {
       const rates = [];
-      const rows = document.querySelectorAll(".curs");
+      const rows = document.querySelectorAll(".trading-table__row");
 
       rows.forEach((row) => {
-        const titleElement = row.querySelector("td > a");
-        const priceElement = row.querySelector("td:nth-child(2)");
+        const titleElement = row.querySelector(".trading-table__cell-value");
+        const priceElement = row.querySelector(
+          ".trading-table__cell:nth-child(2) .trading-table__cell-value"
+        );
 
         if (titleElement && priceElement) {
           rates.push({
