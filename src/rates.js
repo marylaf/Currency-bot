@@ -151,14 +151,20 @@ async function getXeRate() {
       waitUntil: "domcontentloaded",
     });
 
-    await page.waitForSelector(".table__TableCell-sc-1j0jd5l-1.Zbklu");
+    await page.waitForFunction(
+      () => [...document.querySelectorAll("td")].some(el => el.textContent.trim() === "EUR / USD")
+    );
+    
 
     const rate = await page.evaluate(() => {
-      const priceElements = document.querySelectorAll(
-        ".table__TableCell-sc-1j0jd5l-1.Zbklu"
-      );
-      const price = priceElements[4].textContent.trim();
-
+      const rateCells = Array.from(document.querySelectorAll('td'));
+      const eurUsdCellIndex = rateCells.findIndex(cell => cell.textContent.trim() === "EUR / USD");
+      let price = '';
+    
+      if (eurUsdCellIndex !== -1 && rateCells[eurUsdCellIndex + 1]) {
+        price = rateCells[eurUsdCellIndex + 1].textContent.trim();
+      }
+    
       return {
         price,
       };
